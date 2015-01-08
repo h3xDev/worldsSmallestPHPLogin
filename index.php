@@ -1,4 +1,4 @@
-	<?php
+<?php
 	ob_start();
 	session_start();
 	//Debuging mode default is of
@@ -148,4 +148,4 @@
 	</body>
 	<?php if($debugging == "on"){ debugging();}?>
 	</body>
-</html>
+</html>		
