@@ -33,21 +33,34 @@
 		    $login_form .= "</form>";
 		return($login_form);
 	}
+	function render_make_user_form(){
+		$user_form = "";
+	        $user_form .= "<form action=\"index.php?path=new_user\" method=\"post\">";
+			    $user_form .= "<input type=\"text\" name=\"username\"><br /> ";
+			    $user_form .= "<input type=\"password\" name=\"password\" placeholder=\"Password\" /><br />";
+			    $user_form .= "<input type=\"submit\" value=\"Make User\" name=\"makepass\" />";
+		    $user_form .= "</form>";
+		return($user_form);
+	}
 	//this function checks to see if the user exists and the password is correct if so it progresses if not it calls an error
 	function check_creds($user, $pass){
+		//creating password
+		$user1crypt = "$2y$10$4DXZVxJgNacomVELwqQzBOmCABLSI5BTZ5uQd1FuhEwik3EpBwZmW";
+		$user2crypt = "$2y$10$CTzyi9TYSRzHIDnyZusEz.EUu0tErzn9jOs86mgUk90OGojjmb7eK";
+		$user3crypt = "$2y$10$y0A3aG0sVOo/pl.jdDgAseS0VJHH6ivYL.czCpRXP4n1ta8c7sB2O";
+		//remove unsightly character from user input
 		$user = htmlspecialchars($user);
 		$pass = htmlspecialchars($pass);
 		//the users array stores the list of users, the value on the left is the username the value on the right is the password
 		$users = array(
-	   			"user1" => "passwd1",
-	   			"user2" => "passwd2",
-	   			"user3" => "passwd3",
-	   			"user4" => "passwd4",
+	   			"user1" => $user1crypt,
+	   			"user2" => $user2crypt,
+	   			"user3" => $user3crypt,
 	  		);
 		//check if user is in the list of users
 		if (array_key_exists($user, $users)) {
 			//if pass is correct continue
-			if($pass == $users[$user]){
+			if($pass == password_verify($pass, $users[$user])){
 				set_user();
 			}
 			//if password is not correct render login failed error
@@ -105,6 +118,11 @@
 				//$output .= "</span>";
 				return $output;				
 	}
+	function make_password($passIn){
+		$makepass = $passIn;
+		$passcrypt = password_hash($makepass, PASSWORD_DEFAULT);
+		return $passcrypt;
+	}
 	//This is what is rendered on index.php Asks the user to login or renders a welcome
 	if(!isset($_GET['path'])){
 		if(!isset($_SESSION['username'])){
@@ -126,18 +144,26 @@
 	//This is what happends when ndex.php?path=login is called it offers you the log in form
 	if(isset($_GET['path']) && $_GET['path'] == "login"){
 		if(isset($_POST['login'])){
-				if(empty($_POST['username']) || empty($_POST['password'])){
-					echo(get_error("empty_user_pass"));
-					echo(render_login_form());
-				}
-				else{
-					$username = $_POST['username'];
-					$password = $_POST['password'];
-					check_creds($username, $password);
-				}
+			if(empty($_POST['username']) || empty($_POST['password'])){
+				echo(get_error("empty_user_pass"));
+				echo(render_login_form());
+			}
+		else{
+				$username = $_POST['username'];
+				$password = $_POST['password'];
+				check_creds($username, $password);
+			}
         }
 		else{
 			echo(render_login_form());
+		}
+	}
+	if(isset($_GET['path']) && $_GET['path'] == "new_user"){
+		echo(render_make_user_form());
+		if(isset($_POST['makepass'])){
+			$new_user = $_POST['username'];
+			$send_pass = $_POST['password'];
+			echo("\${$new_user}crypt = \"" . make_password($send_pass) . "\";" );
 		}
 	}
 ?>
@@ -148,4 +174,4 @@
 	</body>
 	<?php if($debugging == "on"){ debugging();}?>
 	</body>
-</html>		
+</html>
