@@ -31,11 +31,12 @@
 			    $login_form .= "<input type=\"password\" name=\"password\" /><br />";
 			    $login_form .= "<input type=\"submit\" value=\"Login\" name=\"login\" />";
 		    $login_form .= "</form>";
+		    $login_form .= "<br /><a href=\"index.php?path=register\">Don't have an account?</a>";
 		return($login_form);
 	}
 	function render_make_user_form(){
 		$user_form = "";
-	        $user_form .= "<form action=\"index.php?path=new_user\" method=\"post\">";
+	        $user_form .= "<form action=\"index.php?path=register\" method=\"post\">";
 			    $user_form .= "<input type=\"text\" name=\"username\"><br /> ";
 			    $user_form .= "<input type=\"password\" name=\"password\" placeholder=\"Password\" /><br />";
 			    $user_form .= "<input type=\"submit\" value=\"Make User\" name=\"makepass\" />";
@@ -45,13 +46,14 @@
 	//this function checks to see if the user exists and the password is correct if so it progresses if not it calls an error
 	function check_creds($user, $pass){
 		//creating password
-		$user1crypt = "$2y$10$4DXZVxJgNacomVELwqQzBOmCABLSI5BTZ5uQd1FuhEwik3EpBwZmW";
-		$user2crypt = "$2y$10$CTzyi9TYSRzHIDnyZusEz.EUu0tErzn9jOs86mgUk90OGojjmb7eK";
-		$user3crypt = "$2y$10$y0A3aG0sVOo/pl.jdDgAseS0VJHH6ivYL.czCpRXP4n1ta8c7sB2O";
+		$user1crypt = '$2y$10$4DXZVxJgNacomVELwqQzBOmCABLSI5BTZ5uQd1FuhEwik3EpBwZmW';
+		$user2crypt = '$2y$10$8W0hhsuaL2GlaKQuFyB2deAZd8PUJq9Khw97DPdUj3j0gzUJf8B2m';
+		$user3crypt = '$2y$10$nYngDhrwr3iHTeTkDSmh5uxTK0RZIjDRVVDRuLy.kXwPnWsd53t/a';
 		//remove unsightly character from user input
 		$user = htmlspecialchars($user);
 		$pass = htmlspecialchars($pass);
 		//the users array stores the list of users, the value on the left is the username the value on the right is the password
+		echo $james0vincecrypt;
 		$users = array(
 	   			"user1" => $user1crypt,
 	   			"user2" => $user2crypt,
@@ -120,8 +122,25 @@
 	}
 	function make_password($passIn){
 		$makepass = $passIn;
-		$passcrypt = password_hash($makepass, PASSWORD_DEFAULT);
+		$passcrypt = password_hash($makepass, PASSWORD_BCRYPT);
 		return $passcrypt;
+	}
+	function display_password(){
+		//when the register user form has been posted do this
+		if(isset($_POST['makepass'])){
+			$new_user = $_POST['username'];
+			$send_pass = $_POST['password'];
+			//any bad chars to be converted to HTML friendly
+			$new_crypt_pass = htmlspecialchars(make_password($send_pass));
+			echo "Add this to the list of hashes: <br /><br />";
+			//This print out give you the encrypted password to add to the list
+			echo("$"  . $new_user . "crypt = '" . $new_crypt_pass . "';" );
+			echo "<br /><br />";
+			echo "Add this to the list of users: <br /><br />";
+			//This print out give you the user to add to the array
+			echo("\""  . $new_user . "\" => $" . $new_user. "crypt," );
+			//echo $new_crypt_pass;
+		}
 	}
 	//This is what is rendered on index.php Asks the user to login or renders a welcome
 	if(!isset($_GET['path'])){
@@ -158,13 +177,10 @@
 			echo(render_login_form());
 		}
 	}
-	if(isset($_GET['path']) && $_GET['path'] == "new_user"){
+	if(isset($_GET['path']) && $_GET['path'] == "register"){
 		echo(render_make_user_form());
-		if(isset($_POST['makepass'])){
-			$new_user = $_POST['username'];
-			$send_pass = $_POST['password'];
-			echo("\${$new_user}crypt = \"" . make_password($send_pass) . "\";" );
-		}
+		display_password();
+
 	}
 ?>
 <html>
